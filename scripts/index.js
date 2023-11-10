@@ -13,8 +13,11 @@ const DATA = {
 };
 
 getUsers().then(users => {
-  DATA.users = users,
-  DATA.maxId = users.length
+  DATA.users = users;
+  DATA.maxId = 0; 
+  users.forEach(user => {
+    if (user.id > DATA.maxId) DATA.maxId = user.id;
+  });
 });
 
 const updateResultList = (id) => {
@@ -47,16 +50,18 @@ const updateResultList = (id) => {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-
   document.getElementById('btnGet1').addEventListener('click', async () => {
     results.innerHTML = '';
     const id = document.getElementById('inputGet1Id').value;
-
     getUsers().then(users => {
-      DATA.users = users,
-      DATA.maxId = users.length
+      DATA.users = users;
+      DATA.maxId = 0;
+      users.forEach(user => {
+        if (user.id > DATA.maxId) DATA.maxId = user.id;
+      });
     });
 
+    console.log(DATA.maxId);
     updateResultList(id);
   });
 
@@ -103,4 +108,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateResultList();
   });
 
+  document.getElementById('btnDelete').addEventListener('click', async () => {
+    const id = document.getElementById('inputDelete').value;
+    if (!id) return;
+
+    await fetch(`${ api }users/${ id }`, {
+      method: 'DELETE',
+    });
+
+    DATA.users = DATA.users.filter(user => user.id !== id);
+    if (id === DATA.maxId) {
+      DATA.maxId = 0;
+      DATA.users.forEach(user => {
+        if (user.id > DATA.maxId) DATA.maxId = user.id;
+      });
+    };
+    console.log(DATA.maxId);
+
+    updateResultList();
+  });
 });
